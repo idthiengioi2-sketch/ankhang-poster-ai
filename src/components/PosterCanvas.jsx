@@ -5,7 +5,15 @@ export default function PosterCanvas({
   title,
   date,
   products,
+  columns = 4,
 }) {
+  const gridClass = {
+    2: "grid-cols-2",
+    3: "grid-cols-3",
+    4: "grid-cols-4",
+    5: "grid-cols-5",
+  }[columns];
+
   return (
     <div
       ref={posterRef}
@@ -35,12 +43,9 @@ export default function PosterCanvas({
         </p>
       </div>
 
-      <div className="grid grid-cols-4 gap-5 mt-9">
+      <div className={`grid ${gridClass} gap-5 mt-9`}>
         {products.slice(0, 20).map((product) => (
-          <PosterProductCard
-            key={product.id}
-            product={product}
-          />
+          <PosterProductCard key={product.id} product={product} />
         ))}
       </div>
 

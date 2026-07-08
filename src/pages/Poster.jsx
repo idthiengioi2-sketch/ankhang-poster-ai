@@ -37,6 +37,10 @@ export default function Poster() {
     loadData("ak_date", "06/07 - 19/07")
   );
 
+  const [columns, setColumns] = useState(() =>
+    loadData("ak_columns", 4)
+  );
+
   const [products, setProducts] = useState(() =>
     loadData("ak_products", SAMPLE_PRODUCTS)
   );
@@ -48,6 +52,10 @@ export default function Poster() {
   useEffect(() => {
     saveData("ak_date", date);
   }, [date]);
+
+  useEffect(() => {
+    saveData("ak_columns", columns);
+  }, [columns]);
 
   useEffect(() => {
     saveData("ak_products", products);
@@ -129,10 +137,25 @@ export default function Poster() {
           </label>
 
           <input
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100"
+            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
             value={date}
             onChange={(e) => setDate(e.target.value)}
           />
+
+          <label className="font-bold block mb-2">
+            Số cột sản phẩm
+          </label>
+
+          <select
+            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100 bg-white"
+            value={columns}
+            onChange={(e) => setColumns(Number(e.target.value))}
+          >
+            <option value={2}>2 cột</option>
+            <option value={3}>3 cột</option>
+            <option value={4}>4 cột</option>
+            <option value={5}>5 cột</option>
+          </select>
 
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-black">
@@ -168,6 +191,7 @@ export default function Poster() {
             title={title}
             date={date}
             products={products}
+            columns={columns}
           />
         </section>
       </div>
