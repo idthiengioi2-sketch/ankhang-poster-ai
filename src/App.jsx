@@ -1,14 +1,23 @@
+import { useState } from "react";
+import Sidebar from "./components/Sidebar";
+import Poster from "./pages/Poster";
+
 export default function App() {
+  const [page, setPage] = useState("poster");
+
   return (
-    <div className="min-h-screen bg-slate-100 flex items-center justify-center">
-      <div className="bg-white rounded-3xl shadow-xl p-10 text-center">
-        <h1 className="text-5xl font-black text-green-700">
-          An Khang Poster AI v2
-        </h1>
-        <p className="text-slate-500 mt-4">
-          Đã sẵn sàng xây dựng phần mềm tạo poster
-        </p>
-      </div>
+    <div className="min-h-screen bg-slate-100 flex">
+      <Sidebar page={page} setPage={setPage} />
+
+      <main className="flex-1 p-6 overflow-auto">
+        {page === "poster" && <Poster />}
+        {page === "dashboard" && (
+          <div>
+            <h1 className="text-4xl font-black text-slate-800">Dashboard</h1>
+            <p className="text-slate-500 mt-2">Sẽ nâng cấp ở v0.2</p>
+          </div>
+        )}
+      </main>
     </div>
   );
 }
