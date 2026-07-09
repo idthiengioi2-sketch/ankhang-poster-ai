@@ -3,6 +3,17 @@ import { Package, Plus, Search, Trash2, ImagePlus } from "lucide-react";
 
 import { loadData, saveData } from "../utils/storage";
 
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+
+    reader.readAsDataURL(file);
+  });
+}
+
 export default function Products() {
   const [search, setSearch] = useState("");
 
@@ -28,6 +39,17 @@ export default function Products() {
     product.name.toLowerCase().includes(search.toLowerCase())
   );
 
+  async function uploadFormImage(file) {
+    if (!file) return;
+
+    const imageBase64 = await fileToBase64(file);
+
+    setForm({
+      ...form,
+      image: imageBase64,
+    });
+  }
+
   function addProduct() {
     if (!form.name.trim()) {
       alert("Vui lòng nhập tên sản phẩm");
@@ -50,15 +72,6 @@ export default function Products() {
       oldPrice: "",
       promo: "",
       image: "",
-    });
-  }
-
-  function uploadFormImage(file) {
-    if (!file) return;
-    const imageUrl = URL.createObjectURL(file);
-    setForm({
-      ...form,
-      image: imageUrl,
     });
   }
 
