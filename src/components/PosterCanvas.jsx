@@ -54,7 +54,10 @@ export default function PosterCanvas({
             NHÀ THUỐC AN KHANG
           </h1>
           <p className="text-2xl text-slate-500 mt-2">
-            Sức khỏe cho mọi nhà
+           100% hàng chính hãng
+Minh bạch giá và nguồn gốc
+Không tính phí cắt liều
+Tư vấn đúng thuốc, đúng liều
           </p>
         </div>
 
@@ -82,8 +85,8 @@ export default function PosterCanvas({
       </div>
 
       <div className="absolute left-10 right-10 bottom-8 bg-white/95 rounded-3xl px-8 py-5 flex justify-between text-green-700 text-2xl font-black">
-        <span>Cam kết hàng chính hãng</span>
-        <span>Hotline: 1900 1572</span>
+        <span>Nhà thuốc An Khang Mỹ Luông</span>
+        <span>Hotline: 0931 113 747</span>
       </div>
     </div>
   );

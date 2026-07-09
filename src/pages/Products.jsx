@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import { Package, Plus, Search, Trash2 } from "lucide-react";
+import { Package, Plus, Search, Trash2, ImagePlus } from "lucide-react";
 
 import { loadData, saveData } from "../utils/storage";
 
@@ -17,6 +17,7 @@ export default function Products() {
     price: "",
     oldPrice: "",
     promo: "",
+    image: "",
   });
 
   useEffect(() => {
@@ -48,6 +49,16 @@ export default function Products() {
       price: "",
       oldPrice: "",
       promo: "",
+      image: "",
+    });
+  }
+
+  function uploadFormImage(file) {
+    if (!file) return;
+    const imageUrl = URL.createObjectURL(file);
+    setForm({
+      ...form,
+      image: imageUrl,
     });
   }
 
@@ -88,6 +99,29 @@ export default function Products() {
               Thêm sản phẩm
             </h2>
           </div>
+
+          <label className="block border-2 border-dashed border-slate-300 rounded-3xl p-5 mb-5 cursor-pointer hover:bg-slate-50">
+            <div className="flex items-center justify-center gap-3 text-slate-600 font-bold">
+              <ImagePlus className="text-green-700" />
+              Chọn ảnh sản phẩm
+            </div>
+
+            {form.image && (
+              <div className="mt-4 h-32 bg-slate-100 rounded-2xl grid place-items-center overflow-hidden">
+                <img
+                  src={form.image}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => uploadFormImage(event.target.files[0])}
+            />
+          </label>
 
           <FormInput
             label="Tên sản phẩm"
@@ -152,8 +186,15 @@ export default function Products() {
                 className="p-5 flex items-center justify-between hover:bg-slate-50 transition"
               >
                 <div className="flex items-center gap-4">
-                  <div className="w-16 h-16 rounded-2xl bg-slate-100 grid place-items-center text-slate-400">
-                    <Package size={28} />
+                  <div className="w-20 h-20 rounded-2xl bg-slate-100 grid place-items-center text-slate-400 overflow-hidden">
+                    {product.image ? (
+                      <img
+                        src={product.image}
+                        className="max-w-full max-h-full object-contain"
+                      />
+                    ) : (
+                      <Package size={28} />
+                    )}
                   </div>
 
                   <div>
