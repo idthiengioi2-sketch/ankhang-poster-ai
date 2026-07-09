@@ -1,11 +1,35 @@
 import PosterProductCard from "./PosterProductCard";
 
+const SIZE_CONFIG = {
+  feed: {
+    className: "w-[1080px] h-[1350px]",
+    titleSize: "text-7xl",
+    gridTop: "mt-9",
+  },
+  square: {
+    className: "w-[1080px] h-[1080px]",
+    titleSize: "text-6xl",
+    gridTop: "mt-7",
+  },
+  story: {
+    className: "w-[1080px] h-[1920px]",
+    titleSize: "text-7xl",
+    gridTop: "mt-12",
+  },
+  a4: {
+    className: "w-[1240px] h-[1754px]",
+    titleSize: "text-7xl",
+    gridTop: "mt-12",
+  },
+};
+
 export default function PosterCanvas({
   posterRef,
   title,
   date,
   products,
   columns = 4,
+  posterSize = "feed",
 }) {
   const gridClass = {
     2: "grid-cols-2",
@@ -14,10 +38,15 @@ export default function PosterCanvas({
     5: "grid-cols-5",
   }[columns];
 
+  const size = SIZE_CONFIG[posterSize] || SIZE_CONFIG.feed;
+
   return (
     <div
       ref={posterRef}
-      className="w-[1080px] h-[1350px] bg-gradient-to-b from-green-700 via-green-500 to-green-100 rounded-[36px] p-10 relative overflow-hidden"
+      className={[
+        size.className,
+        "bg-gradient-to-b from-green-700 via-green-500 to-green-100 rounded-[36px] p-10 relative overflow-hidden",
+      ].join(" ")}
     >
       <div className="bg-white rounded-[30px] p-7 flex justify-between items-center shadow">
         <div>
@@ -35,7 +64,7 @@ export default function PosterCanvas({
       </div>
 
       <div className="text-center text-white mt-9">
-        <h2 className="text-7xl font-black drop-shadow">
+        <h2 className={`${size.titleSize} font-black drop-shadow`}>
           {title}
         </h2>
         <p className="text-3xl mt-3">
@@ -43,9 +72,12 @@ export default function PosterCanvas({
         </p>
       </div>
 
-      <div className={`grid ${gridClass} gap-5 mt-9`}>
+      <div className={`grid ${gridClass} gap-5 ${size.gridTop}`}>
         {products.slice(0, 20).map((product) => (
-          <PosterProductCard key={product.id} product={product} />
+          <PosterProductCard
+            key={product.id}
+            product={product}
+          />
         ))}
       </div>
 

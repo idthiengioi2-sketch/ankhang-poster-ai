@@ -41,6 +41,10 @@ export default function Poster() {
     loadData("ak_columns", 4)
   );
 
+  const [posterSize, setPosterSize] = useState(() =>
+    loadData("ak_poster_size", "feed")
+  );
+
   const [products, setProducts] = useState(() =>
     loadData("ak_products", SAMPLE_PRODUCTS)
   );
@@ -56,6 +60,10 @@ export default function Poster() {
   useEffect(() => {
     saveData("ak_columns", columns);
   }, [columns]);
+
+  useEffect(() => {
+    saveData("ak_poster_size", posterSize);
+  }, [posterSize]);
 
   useEffect(() => {
     saveData("ak_products", products);
@@ -103,7 +111,7 @@ export default function Poster() {
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Upload ảnh, nhập giá và xuất PNG 1080×1350.
+            Upload ảnh, nhập giá và xuất PNG nhiều kích thước.
           </p>
         </div>
 
@@ -147,7 +155,7 @@ export default function Poster() {
           </label>
 
           <select
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100 bg-white"
+            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100 bg-white"
             value={columns}
             onChange={(e) => setColumns(Number(e.target.value))}
           >
@@ -155,6 +163,32 @@ export default function Poster() {
             <option value={3}>3 cột</option>
             <option value={4}>4 cột</option>
             <option value={5}>5 cột</option>
+          </select>
+
+          <label className="font-bold block mb-2">
+            Kích thước Poster
+          </label>
+
+          <select
+            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100 bg-white"
+            value={posterSize}
+            onChange={(e) => setPosterSize(e.target.value)}
+          >
+            <option value="feed">
+              Facebook / Zalo Feed (1080×1350)
+            </option>
+
+            <option value="square">
+              Facebook Vuông (1080×1080)
+            </option>
+
+            <option value="story">
+              Story (1080×1920)
+            </option>
+
+            <option value="a4">
+              A4 (1240×1754)
+            </option>
           </select>
 
           <div className="flex justify-between items-center mb-4">
@@ -192,6 +226,7 @@ export default function Poster() {
             date={date}
             products={products}
             columns={columns}
+            posterSize={posterSize}
           />
         </section>
       </div>
