@@ -1,11 +1,12 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, Plus } from "lucide-react";
+import { Download, Plus, PackagePlus } from "lucide-react";
 
 import { loadData, saveData } from "../utils/storage";
 import { exportPNG } from "../utils/exportPNG";
 
 import ProductEditor from "../components/ProductEditor";
 import PosterCanvas from "../components/PosterCanvas";
+import ProductPicker from "../components/ProductPicker";
 
 const SAMPLE_PRODUCTS = [
   {
@@ -28,6 +29,8 @@ const SAMPLE_PRODUCTS = [
 
 export default function Poster() {
   const posterRef = useRef(null);
+
+  const [pickerOpen, setPickerOpen] = useState(false);
 
   const [title, setTitle] = useState(() =>
     loadData("ak_title", "KHUYẾN MÃI LỚN")
@@ -83,6 +86,11 @@ export default function Poster() {
     ]);
   }
 
+  function addProductsFromLibrary(selectedProducts) {
+    setProducts([...products, ...selectedProducts]);
+    setPickerOpen(false);
+  }
+
   function updateProduct(id, field, value) {
     setProducts(
       products.map((item) =>
@@ -104,6 +112,12 @@ export default function Poster() {
 
   return (
     <div>
+      <ProductPicker
+        open={pickerOpen}
+        onClose={() => setPickerOpen(false)}
+        onAddProducts={addProductsFromLibrary}
+      />
+
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-4xl font-black text-slate-800">
@@ -111,7 +125,7 @@ export default function Poster() {
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Upload ảnh, nhập giá và xuất PNG nhiều kích thước.
+            Chọn sản phẩm từ kho, upload ảnh, nhập giá và xuất PNG.
           </p>
         </div>
 
@@ -195,17 +209,27 @@ export default function Poster() {
             <h2 className="text-2xl font-black">
               Sản phẩm ({products.length})
             </h2>
+          </div>
 
+          <div className="grid grid-cols-2 gap-3 mb-4">
             <button
               onClick={addProduct}
-              className="bg-green-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center gap-2"
+              className="bg-green-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2"
             >
               <Plus size={18} />
-              Thêm
+              Thêm tay
+            </button>
+
+            <button
+              onClick={() => setPickerOpen(true)}
+              className="bg-blue-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2"
+            >
+              <PackagePlus size={18} />
+              Chọn từ kho
             </button>
           </div>
 
-          <div className="space-y-4 max-h-[680px] overflow-auto pr-1">
+          <div className="space-y-4 max-h-[620px] overflow-auto pr-1">
             {products.map((product, index) => (
               <ProductEditor
                 key={product.id}
