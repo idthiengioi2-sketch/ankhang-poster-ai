@@ -7,6 +7,7 @@ import { exportPNG } from "../utils/exportPNG";
 import ProductEditor from "../components/ProductEditor";
 import PosterCanvas from "../components/PosterCanvas";
 import ProductPicker from "../components/ProductPicker";
+import TemplateSelector from "../components/TemplateSelector";
 
 const SAMPLE_PRODUCTS = [
   {
@@ -40,18 +41,44 @@ export default function Poster() {
   const posterRef = useRef(null);
 
   const [pickerOpen, setPickerOpen] = useState(false);
-  const [title, setTitle] = useState(() => loadData("ak_title", "KHUYẾN MÃI LỚN"));
-  const [date, setDate] = useState(() => loadData("ak_date", "06/07 - 19/07"));
-  const [columns, setColumns] = useState(() => loadData("ak_columns", 4));
-  const [posterSize, setPosterSize] = useState(() => loadData("ak_poster_size", "feed"));
-  const [logo, setLogo] = useState(() => loadData("ak_logo", ""));
-  const [hotline, setHotline] = useState(() => loadData("ak_hotline", "1900 1572"));
-  const [products, setProducts] = useState(() => loadData("ak_products", SAMPLE_PRODUCTS));
+
+  const [title, setTitle] = useState(() =>
+    loadData("ak_title", "KHUYẾN MÃI LỚN")
+  );
+
+  const [date, setDate] = useState(() =>
+    loadData("ak_date", "06/07 - 19/07")
+  );
+
+  const [columns, setColumns] = useState(() =>
+    loadData("ak_columns", 4)
+  );
+
+  const [posterSize, setPosterSize] = useState(() =>
+    loadData("ak_poster_size", "feed")
+  );
+
+  const [template, setTemplate] = useState(() =>
+    loadData("ak_template", "green")
+  );
+
+  const [logo, setLogo] = useState(() =>
+    loadData("ak_logo", "")
+  );
+
+  const [hotline, setHotline] = useState(() =>
+    loadData("ak_hotline", "1900 1572")
+  );
+
+  const [products, setProducts] = useState(() =>
+    loadData("ak_products", SAMPLE_PRODUCTS)
+  );
 
   useEffect(() => saveData("ak_title", title), [title]);
   useEffect(() => saveData("ak_date", date), [date]);
   useEffect(() => saveData("ak_columns", columns), [columns]);
   useEffect(() => saveData("ak_poster_size", posterSize), [posterSize]);
+  useEffect(() => saveData("ak_template", template), [template]);
   useEffect(() => saveData("ak_logo", logo), [logo]);
   useEffect(() => saveData("ak_hotline", hotline), [hotline]);
   useEffect(() => saveData("ak_products", products), [products]);
@@ -114,7 +141,7 @@ export default function Poster() {
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Chọn sản phẩm từ kho, upload logo, nhập giá và xuất PNG.
+            Chọn sản phẩm từ kho, upload logo, chọn template và xuất PNG.
           </p>
         </div>
 
@@ -201,6 +228,11 @@ export default function Poster() {
             <option value="a4">A4 (1240×1754)</option>
           </select>
 
+          <TemplateSelector
+            template={template}
+            setTemplate={setTemplate}
+          />
+
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-2xl font-black">
               Sản phẩm ({products.length})
@@ -247,6 +279,7 @@ export default function Poster() {
             products={products}
             columns={columns}
             posterSize={posterSize}
+            template={template}
             logo={logo}
             hotline={hotline}
           />

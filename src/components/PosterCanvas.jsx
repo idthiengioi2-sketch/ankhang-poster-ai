@@ -23,6 +23,13 @@ const SIZE_CONFIG = {
   },
 };
 
+const TEMPLATE_BG = {
+  green: "from-green-700 via-green-500 to-green-100",
+  red: "from-red-700 via-red-500 to-red-100",
+  yellow: "from-yellow-500 via-orange-300 to-yellow-100",
+  tet: "from-red-700 via-yellow-400 to-red-100",
+};
+
 export default function PosterCanvas({
   posterRef,
   title,
@@ -30,6 +37,9 @@ export default function PosterCanvas({
   products,
   columns = 4,
   posterSize = "feed",
+  logo = "",
+  hotline = "1900 1572",
+  template = "green",
 }) {
   const gridClass = {
     2: "grid-cols-2",
@@ -39,26 +49,41 @@ export default function PosterCanvas({
   }[columns];
 
   const size = SIZE_CONFIG[posterSize] || SIZE_CONFIG.feed;
+  const bg = TEMPLATE_BG[template] || TEMPLATE_BG.green;
 
   return (
     <div
       ref={posterRef}
       className={[
         size.className,
-        "bg-gradient-to-b from-green-700 via-green-500 to-green-100 rounded-[36px] p-10 relative overflow-hidden",
+        `bg-gradient-to-b ${bg}`,
+        "rounded-[36px] p-10 relative overflow-hidden",
       ].join(" ")}
     >
       <div className="bg-white rounded-[30px] p-7 flex justify-between items-center shadow">
-        <div>
-          <h1 className="text-5xl font-black text-green-700">
-            NHÀ THUỐC AN KHANG
-          </h1>
-          <p className="text-2xl text-slate-500 mt-2">
-           100% hàng chính hãng
-Minh bạch giá và nguồn gốc
-Không tính phí cắt liều
-Tư vấn đúng thuốc, đúng liều
-          </p>
+        <div className="flex items-center gap-5">
+          {logo ? (
+            <div className="w-24 h-24 rounded-3xl bg-white grid place-items-center overflow-hidden border border-slate-100">
+              <img
+                src={logo}
+                className="max-w-full max-h-full object-contain"
+              />
+            </div>
+          ) : (
+            <div className="w-24 h-24 rounded-3xl bg-green-700 text-white grid place-items-center font-black text-3xl">
+              AK
+            </div>
+          )}
+
+          <div>
+            <h1 className="text-5xl font-black text-green-700">
+              NHÀ THUỐC AN KHANG
+            </h1>
+
+            <p className="text-2xl text-slate-500 mt-2">
+              Sức khỏe cho mọi nhà
+            </p>
+          </div>
         </div>
 
         <div className="bg-red-600 text-white px-8 py-4 rounded-3xl text-3xl font-black">
@@ -70,6 +95,7 @@ Tư vấn đúng thuốc, đúng liều
         <h2 className={`${size.titleSize} font-black drop-shadow`}>
           {title}
         </h2>
+
         <p className="text-3xl mt-3">
           Áp dụng: {date}
         </p>
@@ -85,8 +111,8 @@ Tư vấn đúng thuốc, đúng liều
       </div>
 
       <div className="absolute left-10 right-10 bottom-8 bg-white/95 rounded-3xl px-8 py-5 flex justify-between text-green-700 text-2xl font-black">
-        <span>Nhà thuốc An Khang Mỹ Luông</span>
-        <span>Hotline: 0931 113 747</span>
+        <span>Cam kết hàng chính hãng</span>
+        <span>Hotline: {hotline}</span>
       </div>
     </div>
   );
