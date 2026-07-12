@@ -1,13 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, Plus, PackagePlus } from "lucide-react";
+import { Download, Plus, PackagePlus, ImagePlus } from "lucide-react";
 
-import { loadData, saveData } from "../utils/storage";
-import { exportPNG } from "../utils/exportPNG";
+import { loadData, saveData } from "../../shared/utils/storage";
+import { exportPNG } from "../../shared/utils/exportPNG";
 
-import ProductEditor from "../components/ProductEditor";
-import PosterCanvas from "../components/PosterCanvas";
-import ProductPicker from "../components/ProductPicker";
-import TemplateSelector from "../components/TemplateSelector";
+import ProductEditor from "./ProductEditor";
+import PosterCanvas from "./PosterCanvas";
+import ProductPicker from "../../components/ProductPicker";
+import TemplateSelector from "../../components/TemplateSelector";
 
 const SAMPLE_PRODUCTS = [
   {
@@ -28,13 +28,14 @@ const SAMPLE_PRODUCTS = [
   },
 ];
 
-const DEFAULT_PROFILE = {
-  storeName: "NHÀ THUỐC AN KHANG",
-  slogan: "Sức khỏe cho mọi nhà",
-  hotline: "1900 1572",
-  address: "",
-  logo: "",
-};
+function fileToBase64(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = reject;
+    reader.readAsDataURL(file);
+  });
+}
 
 export default function Poster() {
   const posterRef = useRef(null);
@@ -61,38 +62,26 @@ export default function Poster() {
     loadData("ak_template", "green")
   );
 
+  const [logo, setLogo] = useState(() =>
+    loadData("ak_logo", "")
+  );
+
+  const [hotline, setHotline] = useState(() =>
+    loadData("ak_hotline", "1900 1572")
+  );
+
   const [products, setProducts] = useState(() =>
     loadData("ak_products", SAMPLE_PRODUCTS)
   );
 
-  const storeProfile = loadData(
-    "ak_store_profile",
-    DEFAULT_PROFILE
-  );
-
-  useEffect(() => {
-    saveData("ak_title", title);
-  }, [title]);
-
-  useEffect(() => {
-    saveData("ak_date", date);
-  }, [date]);
-
-  useEffect(() => {
-    saveData("ak_columns", columns);
-  }, [columns]);
-
-  useEffect(() => {
-    saveData("ak_poster_size", posterSize);
-  }, [posterSize]);
-
-  useEffect(() => {
-    saveData("ak_template", template);
-  }, [template]);
-
-  useEffect(() => {
-    saveData("ak_products", products);
-  }, [products]);
+  useEffect(() => saveData("ak_title", title), [title]);
+  useEffect(() => saveData("ak_date", date), [date]);
+  useEffect(() => saveData("ak_columns", columns), [columns]);
+  useEffect(() => saveData("ak_poster_size", posterSize), [posterSize]);
+  useEffect(() => saveData("ak_template", template), [template]);
+  useEffect(() => saveData("ak_logo", logo), [logo]);
+  useEffect(() => saveData("ak_hotline", hotline), [hotline]);
+  useEffect(() => saveData("ak_products", products), [products]);
 
   function addProduct() {
     setProducts([
@@ -115,31 +104,26 @@ export default function Poster() {
 
   function updateProduct(id, field, value) {
     setProducts(
-      products.map((product) =>
-        product.id === id
-          ? {
-              ...product,
-              [field]: value,
-            }
-          : product
+      products.map((item) =>
+        item.id === id ? { ...item, [field]: value } : item
       )
     );
   }
 
   function removeProduct(id) {
-    setProducts(
-      products.filter((product) => product.id !== id)
-    );
+    setProducts(products.filter((item) => item.id !== id));
   }
 
-  function clearPosterProducts() {
-    const confirmed = window.confirm(
-      "Bạn có chắc muốn xóa toàn bộ sản phẩm khỏi poster?"
-    );
+  function uploadImage(id, file) {
+    if (!file) return;
+    const imageUrl = URL.createObjectURL(file);
+    updateProduct(id, "image", imageUrl);
+  }
 
-    if (confirmed) {
-      setProducts([]);
-    }
+  async function uploadLogo(file) {
+    if (!file) return;
+    const logoBase64 = await fileToBase64(file);
+    setLogo(logoBase64);
   }
 
   return (
@@ -157,18 +141,13 @@ export default function Poster() {
           </h1>
 
           <p className="text-slate-500 mt-2">
-            Thông tin nhà thuốc được lấy tự động từ Cài đặt cửa hàng.
+            Chọn sản phẩm từ kho, upload logo, chọn template và xuất PNG.
           </p>
         </div>
 
         <button
-          onClick={() =>
-            exportPNG(
-              posterRef.current,
-              `poster-an-khang-${Date.now()}.png`
-            )
-          }
-          className="bg-slate-900 text-white px-6 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-slate-800 transition"
+          onClick={() => exportPNG(posterRef.current)}
+          className="bg-slate-900 text-white px-6 py-4 rounded-2xl font-black flex items-center gap-2"
         >
           <Download size={20} />
           Tải PNG
@@ -177,58 +156,59 @@ export default function Poster() {
 
       <div className="grid grid-cols-[480px_1fr] gap-6">
         <section className="bg-white rounded-3xl p-6 shadow-sm h-fit">
-          <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-5">
-            <p className="font-black text-green-800">
-              {storeProfile.storeName}
-            </p>
-
-            <p className="text-green-700 text-sm mt-1">
-              Hotline: {storeProfile.hotline || "Chưa nhập"}
-            </p>
-
-            <p className="text-green-700 text-sm">
-              Địa chỉ: {storeProfile.address || "Chưa nhập"}
-            </p>
-          </div>
-
           <h2 className="text-2xl font-black mb-5">
             Thông tin chương trình
           </h2>
 
-          <label className="font-bold block mb-2">
-            Tiêu đề
-          </label>
-
+          <label className="font-bold block mb-2">Tiêu đề</label>
           <input
             className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
             value={title}
-            onChange={(event) =>
-              setTitle(event.target.value)
-            }
+            onChange={(e) => setTitle(e.target.value)}
           />
 
-          <label className="font-bold block mb-2">
-            Ngày khuyến mãi
-          </label>
-
+          <label className="font-bold block mb-2">Ngày khuyến mãi</label>
           <input
             className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
             value={date}
-            onChange={(event) =>
-              setDate(event.target.value)
-            }
+            onChange={(e) => setDate(e.target.value)}
           />
 
-          <label className="font-bold block mb-2">
-            Số cột sản phẩm
+          <label className="font-bold block mb-2">Hotline</label>
+          <input
+            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
+            value={hotline}
+            onChange={(e) => setHotline(e.target.value)}
+          />
+
+          <label className="block border-2 border-dashed border-slate-300 rounded-3xl p-5 mb-5 cursor-pointer hover:bg-slate-50">
+            <div className="flex items-center justify-center gap-3 text-slate-600 font-bold">
+              <ImagePlus className="text-green-700" />
+              Upload logo An Khang
+            </div>
+
+            {logo && (
+              <div className="mt-4 h-24 bg-slate-100 rounded-2xl grid place-items-center overflow-hidden">
+                <img
+                  src={logo}
+                  className="max-w-full max-h-full object-contain"
+                />
+              </div>
+            )}
+
+            <input
+              type="file"
+              accept="image/*"
+              className="hidden"
+              onChange={(event) => uploadLogo(event.target.files[0])}
+            />
           </label>
 
+          <label className="font-bold block mb-2">Số cột sản phẩm</label>
           <select
             className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100 bg-white"
             value={columns}
-            onChange={(event) =>
-              setColumns(Number(event.target.value))
-            }
+            onChange={(e) => setColumns(Number(e.target.value))}
           >
             <option value={2}>2 cột</option>
             <option value={3}>3 cột</option>
@@ -236,32 +216,16 @@ export default function Poster() {
             <option value={5}>5 cột</option>
           </select>
 
-          <label className="font-bold block mb-2">
-            Kích thước Poster
-          </label>
-
+          <label className="font-bold block mb-2">Kích thước Poster</label>
           <select
             className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100 bg-white"
             value={posterSize}
-            onChange={(event) =>
-              setPosterSize(event.target.value)
-            }
+            onChange={(e) => setPosterSize(e.target.value)}
           >
-            <option value="feed">
-              Facebook / Zalo Feed (1080×1350)
-            </option>
-
-            <option value="square">
-              Facebook Vuông (1080×1080)
-            </option>
-
-            <option value="story">
-              Story (1080×1920)
-            </option>
-
-            <option value="a4">
-              A4 (1240×1754)
-            </option>
+            <option value="feed">Facebook / Zalo Feed (1080×1350)</option>
+            <option value="square">Facebook Vuông (1080×1080)</option>
+            <option value="story">Story (1080×1920)</option>
+            <option value="a4">A4 (1240×1754)</option>
           </select>
 
           <TemplateSelector
@@ -273,21 +237,12 @@ export default function Poster() {
             <h2 className="text-2xl font-black">
               Sản phẩm ({products.length})
             </h2>
-
-            {products.length > 0 && (
-              <button
-                onClick={clearPosterProducts}
-                className="text-red-600 font-bold text-sm"
-              >
-                Xóa tất cả
-              </button>
-            )}
           </div>
 
           <div className="grid grid-cols-2 gap-3 mb-4">
             <button
               onClick={addProduct}
-              className="bg-green-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition"
+              className="bg-green-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2"
             >
               <Plus size={18} />
               Thêm tay
@@ -295,7 +250,7 @@ export default function Poster() {
 
             <button
               onClick={() => setPickerOpen(true)}
-              className="bg-blue-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+              className="bg-blue-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2"
             >
               <PackagePlus size={18} />
               Chọn từ kho
@@ -310,14 +265,9 @@ export default function Poster() {
                 index={index}
                 updateProduct={updateProduct}
                 removeProduct={removeProduct}
+                uploadImage={uploadImage}
               />
             ))}
-
-            {products.length === 0 && (
-              <div className="text-center text-slate-400 py-10 border-2 border-dashed border-slate-200 rounded-2xl">
-                Chưa có sản phẩm trên poster.
-              </div>
-            )}
           </div>
         </section>
 
@@ -330,11 +280,8 @@ export default function Poster() {
             columns={columns}
             posterSize={posterSize}
             template={template}
-            logo={storeProfile.logo}
-            storeName={storeProfile.storeName}
-            slogan={storeProfile.slogan}
-            hotline={storeProfile.hotline}
-            address={storeProfile.address}
+            logo={logo}
+            hotline={hotline}
           />
         </section>
       </div>
