@@ -1,4 +1,5 @@
 import {
+  Gift,
   ImagePlus,
   LayoutDashboard,
   Package,
@@ -16,6 +17,11 @@ export default function Sidebar({ page, setPage }) {
       id: "products",
       title: "Kho sản phẩm",
       icon: Package,
+    },
+    {
+      id: "promotions",
+      title: "Kho khuyến mãi",
+      icon: Gift,
     },
     {
       id: "settings",
@@ -41,7 +47,7 @@ export default function Sidebar({ page, setPage }) {
         </h1>
 
         <p className="text-green-100 mt-1">
-          Poster AI 1.1
+          Poster AI 1.2
         </p>
       </div>
 
@@ -74,7 +80,7 @@ export default function Sidebar({ page, setPage }) {
         </p>
 
         <p className="text-green-100 text-sm mt-1">
-          Store Profile Module
+          Promotion Library
         </p>
       </div>
     </aside>
