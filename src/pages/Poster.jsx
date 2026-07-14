@@ -4,6 +4,7 @@ import { Download, PackagePlus, Plus } from "lucide-react";
 import { loadData, saveData } from "../utils/storage";
 import { exportPNG } from "../utils/exportPNG";
 
+import BackgroundSelector from "../components/BackgroundSelector";
 import PosterCanvas from "../components/PosterCanvas";
 import ProductEditor from "../components/ProductEditor";
 import ProductPicker from "../components/ProductPicker";
@@ -43,10 +44,8 @@ export default function Poster() {
   const [productPickerOpen, setProductPickerOpen] =
     useState(false);
 
-  const [
-    promotionPickerOpen,
-    setPromotionPickerOpen,
-  ] = useState(false);
+  const [promotionPickerOpen, setPromotionPickerOpen] =
+    useState(false);
 
   const [
     promotionTargetProductId,
@@ -71,6 +70,10 @@ export default function Poster() {
 
   const [template, setTemplate] = useState(() =>
     loadData("ak_template", "green")
+  );
+
+  const [background, setBackground] = useState(() =>
+    loadData("ak_background", "green")
   );
 
   const [products, setProducts] = useState(() =>
@@ -101,6 +104,10 @@ export default function Poster() {
   useEffect(() => {
     saveData("ak_template", template);
   }, [template]);
+
+  useEffect(() => {
+    saveData("ak_background", background);
+  }, [background]);
 
   useEffect(() => {
     saveData("ak_products", products);
@@ -194,6 +201,7 @@ export default function Poster() {
       );
     } catch (error) {
       console.error(error);
+
       alert(
         "Không thể tải poster. Vui lòng thử lại."
       );
@@ -213,9 +221,7 @@ export default function Poster() {
       <PromotionPicker
         open={promotionPickerOpen}
         onClose={closePromotionPicker}
-        onSelectPromotion={
-          applyPromotionToProduct
-        }
+        onSelectPromotion={applyPromotionToProduct}
       />
 
       <div className="mb-6 flex items-center justify-between">
@@ -225,8 +231,7 @@ export default function Poster() {
           </h1>
 
           <p className="mt-2 text-slate-500">
-            Chọn sản phẩm và khuyến mãi từ kho,
-            sau đó xuất poster PNG.
+            Chọn sản phẩm, khuyến mãi, template và nền poster.
           </p>
         </div>
 
@@ -249,14 +254,12 @@ export default function Poster() {
 
             <p className="mt-1 text-sm text-green-700">
               Hotline:{" "}
-              {storeProfile.hotline ||
-                "Chưa nhập"}
+              {storeProfile.hotline || "Chưa nhập"}
             </p>
 
             <p className="text-sm text-green-700">
               Địa chỉ:{" "}
-              {storeProfile.address ||
-                "Chưa nhập"}
+              {storeProfile.address || "Chưa nhập"}
             </p>
           </div>
 
@@ -296,9 +299,7 @@ export default function Poster() {
             className="mb-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={columns}
             onChange={(event) =>
-              setColumns(
-                Number(event.target.value)
-              )
+              setColumns(Number(event.target.value))
             }
           >
             <option value={2}>2 cột</option>
@@ -315,14 +316,11 @@ export default function Poster() {
             className="mb-5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={posterSize}
             onChange={(event) =>
-              setPosterSize(
-                event.target.value
-              )
+              setPosterSize(event.target.value)
             }
           >
             <option value="feed">
-              Facebook / Zalo Feed
-              (1080×1350)
+              Facebook / Zalo Feed (1080×1350)
             </option>
 
             <option value="square">
@@ -341,6 +339,11 @@ export default function Poster() {
           <TemplateSelector
             template={template}
             setTemplate={setTemplate}
+          />
+
+          <BackgroundSelector
+            background={background}
+            setBackground={setBackground}
           />
 
           <div className="mb-4 flex items-center justify-between">
@@ -382,24 +385,18 @@ export default function Poster() {
           </div>
 
           <div className="max-h-[520px] space-y-4 overflow-auto pr-1">
-            {products.map(
-              (product, index) => (
-                <ProductEditor
-                  key={product.id}
-                  product={product}
-                  index={index}
-                  updateProduct={
-                    updateProduct
-                  }
-                  removeProduct={
-                    removeProduct
-                  }
-                  onOpenPromotionPicker={
-                    openPromotionPicker
-                  }
-                />
-              )
-            )}
+            {products.map((product, index) => (
+              <ProductEditor
+                key={product.id}
+                product={product}
+                index={index}
+                updateProduct={updateProduct}
+                removeProduct={removeProduct}
+                onOpenPromotionPicker={
+                  openPromotionPicker
+                }
+              />
+            ))}
 
             {products.length === 0 && (
               <div className="rounded-2xl border-2 border-dashed border-slate-200 py-10 text-center text-slate-400">
@@ -418,10 +415,9 @@ export default function Poster() {
             columns={columns}
             posterSize={posterSize}
             template={template}
+            background={background}
             logo={storeProfile.logo}
-            storeName={
-              storeProfile.storeName
-            }
+            storeName={storeProfile.storeName}
             slogan={storeProfile.slogan}
             hotline={storeProfile.hotline}
             address={storeProfile.address}

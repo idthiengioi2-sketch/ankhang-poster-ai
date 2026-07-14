@@ -1,5 +1,5 @@
 import { Gift, ImagePlus, Trash2 } from "lucide-react";
-import { fileToBase64 } from "../utils/fileToBase64";
+import { fileToBase64 } from "../utils/fileToBase64.js";
 
 export default function ProductEditor({
   product,
@@ -11,36 +11,43 @@ export default function ProductEditor({
   async function uploadImage(file) {
     if (!file) return;
 
-    const image = await fileToBase64(file);
-    updateProduct(product.id, "image", image);
+    try {
+      const image = await fileToBase64(file);
+      updateProduct(product.id, "image", image);
+    } catch (error) {
+      console.error(error);
+      alert("Không thể đọc ảnh. Vui lòng thử ảnh khác.");
+    }
   }
 
   return (
-    <div className="bg-slate-50 border border-slate-200 rounded-2xl p-4">
-      <div className="flex justify-between items-center mb-4">
+    <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4">
+      <div className="mb-4 flex items-center justify-between">
         <h3 className="font-black text-slate-800">
           Sản phẩm {index + 1}
         </h3>
 
         <button
+          type="button"
           onClick={() => removeProduct(product.id)}
-          className="w-10 h-10 rounded-xl bg-red-100 text-red-600 grid place-items-center hover:bg-red-200"
+          className="grid h-10 w-10 place-items-center rounded-xl bg-red-100 text-red-600 hover:bg-red-200"
         >
           <Trash2 size={18} />
         </button>
       </div>
 
-      <label className="block border-2 border-dashed border-slate-300 rounded-2xl p-4 cursor-pointer hover:bg-white mb-4">
-        <div className="flex items-center justify-center gap-2 text-slate-600 font-bold">
+      <label className="mb-4 block cursor-pointer rounded-2xl border-2 border-dashed border-slate-300 p-4 hover:bg-white">
+        <div className="flex items-center justify-center gap-2 font-bold text-slate-600">
           <ImagePlus size={20} />
           Chọn ảnh
         </div>
 
         {product.image && (
-          <div className="mt-3 h-28 bg-slate-100 rounded-xl grid place-items-center overflow-hidden">
+          <div className="mt-3 grid h-28 place-items-center overflow-hidden rounded-xl bg-slate-100">
             <img
               src={product.image}
-              className="max-w-full max-h-full object-contain"
+              alt={product.name || "Ảnh sản phẩm"}
+              className="max-h-full max-w-full object-contain"
             />
           </div>
         )}
@@ -49,74 +56,74 @@ export default function ProductEditor({
           type="file"
           accept="image/*"
           className="hidden"
-          onChange={(e) => uploadImage(e.target.files[0])}
+          onChange={(event) =>
+            uploadImage(event.target.files?.[0])
+          }
         />
       </label>
 
       <Input
         placeholder="Tên sản phẩm"
-        value={product.name}
-        onChange={(v) =>
-          updateProduct(product.id, "name", v)
+        value={product.name || ""}
+        onChange={(value) =>
+          updateProduct(product.id, "name", value)
         }
       />
 
       <Input
         placeholder="Giá khuyến mãi"
-        value={product.price}
-        onChange={(v) =>
-          updateProduct(product.id, "price", v)
+        value={product.price || ""}
+        onChange={(value) =>
+          updateProduct(product.id, "price", value)
         }
       />
 
       <Input
         placeholder="Giá cũ"
-        value={product.oldPrice}
-        onChange={(v) =>
-          updateProduct(product.id, "oldPrice", v)
+        value={product.oldPrice || ""}
+        onChange={(value) =>
+          updateProduct(product.id, "oldPrice", value)
         }
       />
 
-      <div className="flex gap-2 mt-2">
+      <div className="mt-2 flex gap-2">
         <input
-          className="flex-1 border border-slate-200 rounded-xl px-3 py-2 outline-none focus:ring-4 focus:ring-green-100"
+          className="flex-1 rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-4 focus:ring-green-100"
           placeholder="Khuyến mãi"
-          value={product.promo}
-          onChange={(e) =>
+          value={product.promo || ""}
+          onChange={(event) =>
             updateProduct(
               product.id,
               "promo",
-              e.target.value
+              event.target.value
             )
           }
         />
 
-        <button
-          type="button"
-          onClick={() =>
-            onOpenPromotionPicker(product.id)
-          }
-          className="px-3 rounded-xl bg-orange-500 text-white hover:bg-orange-600"
-          title="Chọn từ kho khuyến mãi"
-        >
-          <Gift size={18} />
-        </button>
+        {onOpenPromotionPicker && (
+          <button
+            type="button"
+            onClick={() =>
+              onOpenPromotionPicker(product.id)
+            }
+            className="rounded-xl bg-orange-500 px-3 text-white hover:bg-orange-600"
+            title="Chọn từ kho khuyến mãi"
+          >
+            <Gift size={18} />
+          </button>
+        )}
       </div>
     </div>
   );
 }
 
-function Input({
-  placeholder,
-  value,
-  onChange,
-}) {
+function Input({ placeholder, value, onChange }) {
   return (
     <input
-      className="w-full border border-slate-200 rounded-xl px-3 py-2 mb-2 outline-none focus:ring-4 focus:ring-green-100"
+      className="mb-2 w-full rounded-xl border border-slate-200 px-3 py-2 outline-none focus:ring-4 focus:ring-green-100"
       placeholder={placeholder}
       value={value}
-      onChange={(e) => onChange(e.target.value)}
+      onChange={(event) => onChange(event.target.value)}
     />
   );
 }
