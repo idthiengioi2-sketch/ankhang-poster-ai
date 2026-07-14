@@ -1,5 +1,9 @@
 import PosterProductCard from "./PosterProductCard";
-import { getBackgroundById } from "../utils/backgrounds";
+import { getBackgroundById } from "../utils/backgrounds.js";
+import {
+  getAutoColumns,
+  getGridColumns,
+} from "../utils/layout.js";
 
 const SIZE_CONFIG = {
   feed: {
@@ -57,8 +61,8 @@ export default function PosterCanvas({
   posterRef,
   title,
   date,
-  products,
-  columns = 4,
+  products = [],
+  columns = "auto",
   posterSize = "feed",
   template = "green",
   background = "green",
@@ -68,13 +72,14 @@ export default function PosterCanvas({
   hotline = "1900 1572",
   address = "",
 }) {
-  const gridClass =
-    {
-      2: "grid-cols-2",
-      3: "grid-cols-3",
-      4: "grid-cols-4",
-      5: "grid-cols-5",
-    }[columns] || "grid-cols-4";
+  const productCount = products.length;
+
+  const effectiveColumns =
+    columns === "auto"
+      ? getAutoColumns(productCount)
+      : Number(columns) || getAutoColumns(productCount);
+
+  const gridClass = getGridColumns(effectiveColumns);
 
   const size =
     SIZE_CONFIG[posterSize] || SIZE_CONFIG.feed;
@@ -168,6 +173,7 @@ export default function PosterCanvas({
           <PosterProductCard
             key={product.id}
             product={product}
+            columns={effectiveColumns}
           />
         ))}
       </section>

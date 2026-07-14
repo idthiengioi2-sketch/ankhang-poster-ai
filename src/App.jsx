@@ -1,35 +1,44 @@
 import { useState } from "react";
 
 import Sidebar from "./components/Sidebar";
+
+import Dashboard from "./pages/Dashboard";
 import Poster from "./pages/Poster";
 import Products from "./pages/Products";
 import Promotions from "./pages/Promotions";
 import Settings from "./pages/Settings";
 
 export default function App() {
-  const [page, setPage] = useState("poster");
+  const [page, setPage] = useState("dashboard");
+
+  function navigateTo(nextPage) {
+    setPage(nextPage);
+
+    window.scrollTo({
+      top: 0,
+      behavior: "smooth",
+    });
+  }
 
   return (
     <div className="min-h-screen bg-slate-100 flex">
-      <Sidebar page={page} setPage={setPage} />
+      <Sidebar
+        page={page}
+        setPage={navigateTo}
+      />
 
-      <main className="flex-1 p-6 overflow-auto">
-        {page === "poster" && <Poster />}
-        {page === "products" && <Products />}
-        {page === "promotions" && <Promotions />}
-        {page === "settings" && <Settings />}
-
+      <main className="flex-1 overflow-auto p-6">
         {page === "dashboard" && (
-          <div>
-            <h1 className="text-4xl font-black text-slate-800">
-              Dashboard
-            </h1>
-
-            <p className="text-slate-500 mt-2">
-              Tổng quan An Khang Poster AI.
-            </p>
-          </div>
+          <Dashboard onNavigate={navigateTo} />
         )}
+
+        {page === "poster" && <Poster />}
+
+        {page === "products" && <Products />}
+
+        {page === "promotions" && <Promotions />}
+
+        {page === "settings" && <Settings />}
       </main>
     </div>
   );
