@@ -1,12 +1,13 @@
 import { useEffect, useRef, useState } from "react";
-import { Download, Plus, PackagePlus } from "lucide-react";
+import { Download, PackagePlus, Plus } from "lucide-react";
 
 import { loadData, saveData } from "../utils/storage";
 import { exportPNG } from "../utils/exportPNG";
 
-import ProductEditor from "../components/ProductEditor";
 import PosterCanvas from "../components/PosterCanvas";
+import ProductEditor from "../components/ProductEditor";
 import ProductPicker from "../components/ProductPicker";
+import PromotionPicker from "../components/PromotionPicker";
 import TemplateSelector from "../components/TemplateSelector";
 
 const SAMPLE_PRODUCTS = [
@@ -39,7 +40,18 @@ const DEFAULT_PROFILE = {
 export default function Poster() {
   const posterRef = useRef(null);
 
-  const [pickerOpen, setPickerOpen] = useState(false);
+  const [productPickerOpen, setProductPickerOpen] =
+    useState(false);
+
+  const [
+    promotionPickerOpen,
+    setPromotionPickerOpen,
+  ] = useState(false);
+
+  const [
+    promotionTargetProductId,
+    setPromotionTargetProductId,
+  ] = useState(null);
 
   const [title, setTitle] = useState(() =>
     loadData("ak_title", "KHUYẾN MÃI LỚN")
@@ -95,8 +107,8 @@ export default function Poster() {
   }, [products]);
 
   function addProduct() {
-    setProducts([
-      ...products,
+    setProducts((currentProducts) => [
+      ...currentProducts,
       {
         id: crypto.randomUUID(),
         name: "",
@@ -109,13 +121,17 @@ export default function Poster() {
   }
 
   function addProductsFromLibrary(selectedProducts) {
-    setProducts([...products, ...selectedProducts]);
-    setPickerOpen(false);
+    setProducts((currentProducts) => [
+      ...currentProducts,
+      ...selectedProducts,
+    ]);
+
+    setProductPickerOpen(false);
   }
 
   function updateProduct(id, field, value) {
-    setProducts(
-      products.map((product) =>
+    setProducts((currentProducts) =>
+      currentProducts.map((product) =>
         product.id === id
           ? {
               ...product,
@@ -127,8 +143,10 @@ export default function Poster() {
   }
 
   function removeProduct(id) {
-    setProducts(
-      products.filter((product) => product.id !== id)
+    setProducts((currentProducts) =>
+      currentProducts.filter(
+        (product) => product.id !== id
+      )
     );
   }
 
@@ -137,38 +155,85 @@ export default function Poster() {
       "Bạn có chắc muốn xóa toàn bộ sản phẩm khỏi poster?"
     );
 
-    if (confirmed) {
-      setProducts([]);
+    if (!confirmed) {
+      return;
+    }
+
+    setProducts([]);
+  }
+
+  function openPromotionPicker(productId) {
+    setPromotionTargetProductId(productId);
+    setPromotionPickerOpen(true);
+  }
+
+  function closePromotionPicker() {
+    setPromotionPickerOpen(false);
+    setPromotionTargetProductId(null);
+  }
+
+  function applyPromotionToProduct(promotion) {
+    if (!promotionTargetProductId) {
+      return;
+    }
+
+    updateProduct(
+      promotionTargetProductId,
+      "promo",
+      promotion.name || ""
+    );
+
+    closePromotionPicker();
+  }
+
+  async function downloadPoster() {
+    try {
+      await exportPNG(
+        posterRef.current,
+        `poster-an-khang-${Date.now()}.png`
+      );
+    } catch (error) {
+      console.error(error);
+      alert(
+        "Không thể tải poster. Vui lòng thử lại."
+      );
     }
   }
 
   return (
     <div>
       <ProductPicker
-        open={pickerOpen}
-        onClose={() => setPickerOpen(false)}
+        open={productPickerOpen}
+        onClose={() =>
+          setProductPickerOpen(false)
+        }
         onAddProducts={addProductsFromLibrary}
       />
 
-      <div className="flex items-center justify-between mb-6">
+      <PromotionPicker
+        open={promotionPickerOpen}
+        onClose={closePromotionPicker}
+        onSelectPromotion={
+          applyPromotionToProduct
+        }
+      />
+
+      <div className="mb-6 flex items-center justify-between">
         <div>
           <h1 className="text-4xl font-black text-slate-800">
             Tạo Poster
           </h1>
 
-          <p className="text-slate-500 mt-2">
-            Thông tin nhà thuốc được lấy tự động từ Cài đặt cửa hàng.
+          <p className="mt-2 text-slate-500">
+            Chọn sản phẩm và khuyến mãi từ kho,
+            sau đó xuất poster PNG.
           </p>
         </div>
 
         <button
-          onClick={() =>
-            exportPNG(
-              posterRef.current,
-              `poster-an-khang-${Date.now()}.png`
-            )
-          }
-          className="bg-slate-900 text-white px-6 py-4 rounded-2xl font-black flex items-center gap-2 hover:bg-slate-800 transition"
+          type="button"
+          onClick={downloadPoster}
+          className="flex items-center gap-2 rounded-2xl bg-slate-900 px-6 py-4 font-black text-white transition hover:bg-slate-800"
         >
           <Download size={20} />
           Tải PNG
@@ -176,58 +241,64 @@ export default function Poster() {
       </div>
 
       <div className="grid grid-cols-[480px_1fr] gap-6">
-        <section className="bg-white rounded-3xl p-6 shadow-sm h-fit">
-          <div className="bg-green-50 border border-green-100 rounded-2xl p-4 mb-5">
+        <section className="h-fit rounded-3xl bg-white p-6 shadow-sm">
+          <div className="mb-5 rounded-2xl border border-green-100 bg-green-50 p-4">
             <p className="font-black text-green-800">
               {storeProfile.storeName}
             </p>
 
-            <p className="text-green-700 text-sm mt-1">
-              Hotline: {storeProfile.hotline || "Chưa nhập"}
+            <p className="mt-1 text-sm text-green-700">
+              Hotline:{" "}
+              {storeProfile.hotline ||
+                "Chưa nhập"}
             </p>
 
-            <p className="text-green-700 text-sm">
-              Địa chỉ: {storeProfile.address || "Chưa nhập"}
+            <p className="text-sm text-green-700">
+              Địa chỉ:{" "}
+              {storeProfile.address ||
+                "Chưa nhập"}
             </p>
           </div>
 
-          <h2 className="text-2xl font-black mb-5">
+          <h2 className="mb-5 text-2xl font-black">
             Thông tin chương trình
           </h2>
 
-          <label className="font-bold block mb-2">
+          <label className="mb-2 block font-bold">
             Tiêu đề
           </label>
 
           <input
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
+            className="mb-4 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={title}
             onChange={(event) =>
               setTitle(event.target.value)
             }
           />
 
-          <label className="font-bold block mb-2">
+          <label className="mb-2 block font-bold">
             Ngày khuyến mãi
           </label>
 
           <input
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100"
+            className="mb-4 w-full rounded-2xl border border-slate-200 px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={date}
             onChange={(event) =>
               setDate(event.target.value)
             }
           />
 
-          <label className="font-bold block mb-2">
+          <label className="mb-2 block font-bold">
             Số cột sản phẩm
           </label>
 
           <select
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-4 outline-none focus:ring-4 focus:ring-green-100 bg-white"
+            className="mb-4 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={columns}
             onChange={(event) =>
-              setColumns(Number(event.target.value))
+              setColumns(
+                Number(event.target.value)
+              )
             }
           >
             <option value={2}>2 cột</option>
@@ -236,19 +307,22 @@ export default function Poster() {
             <option value={5}>5 cột</option>
           </select>
 
-          <label className="font-bold block mb-2">
+          <label className="mb-2 block font-bold">
             Kích thước Poster
           </label>
 
           <select
-            className="w-full border border-slate-200 rounded-2xl px-4 py-3 mb-5 outline-none focus:ring-4 focus:ring-green-100 bg-white"
+            className="mb-5 w-full rounded-2xl border border-slate-200 bg-white px-4 py-3 outline-none focus:ring-4 focus:ring-green-100"
             value={posterSize}
             onChange={(event) =>
-              setPosterSize(event.target.value)
+              setPosterSize(
+                event.target.value
+              )
             }
           >
             <option value="feed">
-              Facebook / Zalo Feed (1080×1350)
+              Facebook / Zalo Feed
+              (1080×1350)
             </option>
 
             <option value="square">
@@ -269,59 +343,73 @@ export default function Poster() {
             setTemplate={setTemplate}
           />
 
-          <div className="flex justify-between items-center mb-4">
+          <div className="mb-4 flex items-center justify-between">
             <h2 className="text-2xl font-black">
               Sản phẩm ({products.length})
             </h2>
 
             {products.length > 0 && (
               <button
+                type="button"
                 onClick={clearPosterProducts}
-                className="text-red-600 font-bold text-sm"
+                className="text-sm font-bold text-red-600 hover:text-red-700"
               >
                 Xóa tất cả
               </button>
             )}
           </div>
 
-          <div className="grid grid-cols-2 gap-3 mb-4">
+          <div className="mb-4 grid grid-cols-2 gap-3">
             <button
+              type="button"
               onClick={addProduct}
-              className="bg-green-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-green-700 transition"
+              className="flex items-center justify-center gap-2 rounded-2xl bg-green-600 px-4 py-3 font-bold text-white transition hover:bg-green-700"
             >
               <Plus size={18} />
               Thêm tay
             </button>
 
             <button
-              onClick={() => setPickerOpen(true)}
-              className="bg-blue-600 text-white px-4 py-3 rounded-2xl font-bold flex items-center justify-center gap-2 hover:bg-blue-700 transition"
+              type="button"
+              onClick={() =>
+                setProductPickerOpen(true)
+              }
+              className="flex items-center justify-center gap-2 rounded-2xl bg-blue-600 px-4 py-3 font-bold text-white transition hover:bg-blue-700"
             >
               <PackagePlus size={18} />
               Chọn từ kho
             </button>
           </div>
 
-          <div className="space-y-4 max-h-[520px] overflow-auto pr-1">
-            {products.map((product, index) => (
-              <ProductEditor
-                key={product.id}
-                product={product}
-                index={index}
-                updateProduct={updateProduct}
-                removeProduct={removeProduct}
-              />
-            ))}
+          <div className="max-h-[520px] space-y-4 overflow-auto pr-1">
+            {products.map(
+              (product, index) => (
+                <ProductEditor
+                  key={product.id}
+                  product={product}
+                  index={index}
+                  updateProduct={
+                    updateProduct
+                  }
+                  removeProduct={
+                    removeProduct
+                  }
+                  onOpenPromotionPicker={
+                    openPromotionPicker
+                  }
+                />
+              )
+            )}
 
             {products.length === 0 && (
-              <div className="text-center text-slate-400 py-10 border-2 border-dashed border-slate-200 rounded-2xl">
+              <div className="rounded-2xl border-2 border-dashed border-slate-200 py-10 text-center text-slate-400">
                 Chưa có sản phẩm trên poster.
               </div>
             )}
           </div>
         </section>
 
-        <section className="bg-white rounded-3xl p-5 shadow-sm overflow-auto max-h-[calc(100vh-150px)]">
+        <section className="max-h-[calc(100vh-150px)] overflow-auto rounded-3xl bg-white p-5 shadow-sm">
           <PosterCanvas
             posterRef={posterRef}
             title={title}
@@ -331,7 +419,9 @@ export default function Poster() {
             posterSize={posterSize}
             template={template}
             logo={storeProfile.logo}
-            storeName={storeProfile.storeName}
+            storeName={
+              storeProfile.storeName
+            }
             slogan={storeProfile.slogan}
             hotline={storeProfile.hotline}
             address={storeProfile.address}
